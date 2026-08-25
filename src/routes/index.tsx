@@ -22,15 +22,20 @@ type Point = { x: number; y: number };
 const START: Point = { x: 768, y: 220 };
 const PLAYER_RADIUS = 18;
 const STEP = 10;
+/** Predator stands at the chateau base (NE tile). */
+const HUNTER_POST: Point = { x: 1290, y: 180 };
 
 function WorldGame() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const pressedRef = useRef(new Set<string>());
+  const moveTimeoutRef = useRef<number | null>(null);
   const [player, setPlayer] = useState<Point>(START);
   const [viewport, setViewport] = useState({ width: 390, height: 844 });
   const [time, setTime] = useState<TimeOfDay>("night");
   const [zoom, setZoom] = useState(1.35);
   const [markersVisible, setMarkersVisible] = useState(true);
+  const [moving, setMoving] = useState(false);
+  const [facing, setFacing] = useState<1 | -1>(1);
 
   useEffect(() => {
     const element = viewportRef.current;
@@ -43,12 +48,21 @@ function WorldGame() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => () => {
+    if (moveTimeoutRef.current) window.clearTimeout(moveTimeoutRef.current);
+  }, []);
+
   const move = useCallback((dx: number, dy: number) => {
+    if (dx !== 0) setFacing(dx > 0 ? 1 : -1);
+    setMoving(true);
+    if (moveTimeoutRef.current) window.clearTimeout(moveTimeoutRef.current);
+    moveTimeoutRef.current = window.setTimeout(() => setMoving(false), 140);
     setPlayer((current) => ({
       x: Math.max(PLAYER_RADIUS, Math.min(WORLD_SIZE - PLAYER_RADIUS, current.x + dx)),
       y: Math.max(PLAYER_RADIUS, Math.min(WORLD_SIZE - PLAYER_RADIUS, current.y + dy)),
     }));
   }, []);
+
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
