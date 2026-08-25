@@ -135,9 +135,28 @@ function WorldGame() {
           </div>
         ))}
 
-        <div className="player-shadow absolute z-20 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ left: player.x, top: player.y }} aria-label="Player">
-          <ChevronUp className="size-5" strokeWidth={4} />
-        </div>
+        <img
+          className="pixelated absolute z-10 block -translate-x-1/2 -translate-y-1/2 select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]"
+          src={CHARACTER_SPRITES.hunter}
+          alt="Predator"
+          draggable={false}
+          style={{ left: HUNTER_POST.x, top: HUNTER_POST.y, width: SPRITE_SIZE.hunter, height: SPRITE_SIZE.hunter }}
+        />
+
+        <img
+          className="player-shadow pixelated absolute z-20 block select-none"
+          src={moving ? CHARACTER_SPRITES.survivorRun : CHARACTER_SPRITES.survivorIdle}
+          alt="Player"
+          draggable={false}
+          style={{
+            left: player.x,
+            top: player.y,
+            width: SPRITE_SIZE.runner,
+            height: SPRITE_SIZE.runner,
+            transform: `translate(-50%, -50%) scaleX(${facing})`,
+          }}
+        />
+
       </div>
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
