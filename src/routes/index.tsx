@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, EyeOff, MapPin, Moon, Sun, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAP_MARKERS, TILE_SIZE, WORLD_SIZE, WORLD_TILES, type TimeOfDay } from "@/lib/world-map";
+import { CHARACTER_SPRITES, SPRITE_SIZE } from "@/lib/characters";
 
 export const Route = createFileRoute("/")({
   head: () => ({
