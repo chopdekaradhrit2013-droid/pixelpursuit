@@ -37,7 +37,7 @@ export const WORLD_TILES: WorldTile[] = [
   { id: "w", name: "Swamp / Fog", x: 0, y: 512, day: wDay.url, night: wNight.url },
   { id: "center", name: "Crossroads · Main Hunt", x: 512, y: 512, day: centerDay.url, night: centerNight.url },
   { id: "e", name: "Kennels + Watchtower", x: 1024, y: 512, day: eDay.url, night: eNight.url },
-  { id: "sw", name: "Cliff Cave · Secret Escape", x: 0, y: 1024, day: swDay.url, night: nwNight.url },,
+  { id: "sw", name: "Cliff Cave · Secret Escape", x: 0, y: 1024, day: swDay.url, night: nwNight.url },
   { id: "s", name: "South Beach Wreckage", x: 512, y: 1024, day: sDay.url, night: sNight.url },
   { id: "se", name: "River Delta Choke", x: 1024, y: 1024, night: seNight.url },
 ];
