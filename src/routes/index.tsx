@@ -84,10 +84,16 @@ function WorldGame() {
   }, [player, viewport, zoom]);
 
   const visibleTiles = useMemo(() => {
-    const col = Math.floor(player.x / TILE_SIZE);
-    const row = Math.floor(player.y / TILE_SIZE);
-    return WORLD_TILES.filter((tile) => Math.abs(tile.x / TILE_SIZE - col) <= 1 && Math.abs(tile.y / TILE_SIZE - row) <= 1);
-  }, [player]);
+    const left = -camera.x / zoom;
+    const top = -camera.y / zoom;
+    const right = left + viewport.width / zoom;
+    const bottom = top + viewport.height / zoom;
+    const buffer = 32;
+    return WORLD_TILES.filter((tile) =>
+      tile.x + TILE_SIZE >= left - buffer && tile.x <= right + buffer &&
+      tile.y + TILE_SIZE >= top - buffer && tile.y <= bottom + buffer,
+    );
+  }, [camera, viewport, zoom]);
 
   const currentTile = WORLD_TILES.find((tile) => player.x >= tile.x && player.x < tile.x + TILE_SIZE && player.y >= tile.y && player.y < tile.y + TILE_SIZE);
   const dayUnavailable = time === "day" && currentTile?.day === undefined;
