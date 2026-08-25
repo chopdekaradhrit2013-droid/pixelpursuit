@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, EyeOff, MapPin, Moon, Sun, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAP_MARKERS, TILE_SIZE, WORLD_SIZE, WORLD_TILES, type TimeOfDay } from "@/lib/world-map";
+import { CHARACTER_SPRITES, SPRITE_SIZE } from "@/lib/characters";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,15 +22,20 @@ type Point = { x: number; y: number };
 const START: Point = { x: 768, y: 220 };
 const PLAYER_RADIUS = 18;
 const STEP = 10;
+/** Predator stands at the chateau base (NE tile). */
+const HUNTER_POST: Point = { x: 1290, y: 180 };
 
 function WorldGame() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const pressedRef = useRef(new Set<string>());
+  const moveTimeoutRef = useRef<number | null>(null);
   const [player, setPlayer] = useState<Point>(START);
   const [viewport, setViewport] = useState({ width: 390, height: 844 });
   const [time, setTime] = useState<TimeOfDay>("night");
   const [zoom, setZoom] = useState(1.35);
   const [markersVisible, setMarkersVisible] = useState(true);
+  const [moving, setMoving] = useState(false);
+  const [facing, setFacing] = useState<1 | -1>(1);
 
   useEffect(() => {
     const element = viewportRef.current;
@@ -42,12 +48,21 @@ function WorldGame() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => () => {
+    if (moveTimeoutRef.current) window.clearTimeout(moveTimeoutRef.current);
+  }, []);
+
   const move = useCallback((dx: number, dy: number) => {
+    if (dx !== 0) setFacing(dx > 0 ? 1 : -1);
+    setMoving(true);
+    if (moveTimeoutRef.current) window.clearTimeout(moveTimeoutRef.current);
+    moveTimeoutRef.current = window.setTimeout(() => setMoving(false), 140);
     setPlayer((current) => ({
       x: Math.max(PLAYER_RADIUS, Math.min(WORLD_SIZE - PLAYER_RADIUS, current.x + dx)),
       y: Math.max(PLAYER_RADIUS, Math.min(WORLD_SIZE - PLAYER_RADIUS, current.y + dy)),
     }));
   }, []);
+
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -135,9 +150,28 @@ function WorldGame() {
           </div>
         ))}
 
-        <div className="player-shadow absolute z-20 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ left: player.x, top: player.y }} aria-label="Player">
-          <ChevronUp className="size-5" strokeWidth={4} />
-        </div>
+        <img
+          className="pixelated absolute z-10 block -translate-x-1/2 -translate-y-1/2 select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]"
+          src={CHARACTER_SPRITES.hunter}
+          alt="Predator"
+          draggable={false}
+          style={{ left: HUNTER_POST.x, top: HUNTER_POST.y, width: SPRITE_SIZE.hunter, height: SPRITE_SIZE.hunter }}
+        />
+
+        <img
+          className="player-shadow pixelated absolute z-20 block select-none"
+          src={moving ? CHARACTER_SPRITES.survivorRun : CHARACTER_SPRITES.survivorIdle}
+          alt="Player"
+          draggable={false}
+          style={{
+            left: player.x,
+            top: player.y,
+            width: SPRITE_SIZE.runner,
+            height: SPRITE_SIZE.runner,
+            transform: `translate(-50%, -50%) scaleX(${facing})`,
+          }}
+        />
+
       </div>
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
