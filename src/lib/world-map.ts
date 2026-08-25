@@ -31,7 +31,7 @@ export type WorldTile = {
 };
 
 export const WORLD_TILES: WorldTile[] = [
-  { id: "nw", name: "Jungle Cliffs", x: 0, y: 0, day: nwDay.url, night: nwNight.url },
+  { id: "nw", name: "Jungle Cliffs", x: 0, y: 0, day: nwDay.url, night: swNight.url },
   { id: "n", name: "Shipwreck Spawn", x: 512, y: 0, day: nDay.url, night: nNight.url },
   { id: "ne", name: "Chateau · Predator Base", x: 1024, y: 0, day: neDay.url, night: neNight.url },
   { id: "w", name: "Swamp / Fog", x: 0, y: 512, day: wDay.url, night: wNight.url },
