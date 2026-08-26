@@ -1,45 +1,34 @@
-# Pixel Pursuit
+# PIXEL PURSUIT
 
-A browser survival hunt set on a seamless 3×3 jungle world.
+**Recover three signal beacons. Outrun the predator. Extract before night takes the island.**
 
-You are the survivor. Recover three signal beacons, stay out of the predator’s cone, and extract through the southwest cave before the clock dies.
+A browser survival hunt on a seamless 3×3 jungle — separate day and night art, a hunter that patrols / chases / searches, and a cave extract when the last beacon is live.
 
-**Live (Lovable):** https://pixelpursuit.lovable.app
+Play: https://pixelpursuit.lovable.app
 
-## What’s in this build
+## Play
+- Move: WASD, arrows, or on-screen pad
+- Sprint: Shift, Space, or RUN
+- Pause: P / Esc
+- Night: N or the sun button (auto nightfall under 1:15)
 
-- Tiled large world with separate day and night art (your assets, not recolors)
-- Camera follow, zoom, and mobile D-pad
-- Predator AI: patrol → chase → search last seen
-- Night vignette and reduced detection range
-- Stamina sprint, swamp slow, water block, kennel snares
-- Hide zones that break line of sight
-- Beacon objectives + cave extraction
-- Title, brief, pause, victory, and defeat flow
-- Local high score
-- Web-audio stingers (muteable)
+**Standard** — three minutes, readable hunter  
+**Nightmare** — shorter clock, longer vision, faster chase
 
-## Controls
+## Systems
+- Tiled 1536×1536 world (do not flatten to one image)
+- Hide zones cut detection if you stand still
+- Swamp slows, water blocks, kennels snare
+- Compass points at the next beacon, then the cave
+- Local best score
 
-| Action | Input |
-| --- | --- |
-| Move | WASD / arrows / on-screen pad |
-| Sprint | Shift or Space / RUN |
-| Pause | P or Escape |
-| Day / night | HUD toggle |
+## Publish
+See `PUBLISH.md` for Vercel + itch.io.
 
-## Modes
-
-- **Standard hunt** — 3:00, readable predator
-- **Nightmare** — tighter clock, longer vision, faster chase
-
-## Develop
-
+## Dev
 ```sh
 npm i
 npm run dev
 ```
-
-Map sections live in `src/lib/world-map.ts`. Game feel lives in `src/game/config.ts`.
-
-Do not flatten the world into one image. Keep tiles, and only render what the camera needs.
+Feel numbers: `src/game/config.ts`  
+Tiles: `src/lib/world-map.ts`

@@ -1,0 +1,18 @@
+{
+  "name": "Pixel Pursuit",
+  "short_name": "Pursuit",
+  "description": "Recover three beacons. Outrun the predator. Extract before night takes the island.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
