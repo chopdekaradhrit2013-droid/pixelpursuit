@@ -60,4 +60,72 @@ button { font: inherit; }
 .player-shadow { box-shadow: 0 5px 0 oklch(0.05 0 0 / 45%), 0 0 0 3px oklch(0.97 0.02 95 / 80%); }
 .marker-pulse { animation: marker-pulse 1.8s ease-in-out infinite; }
 @keyframes marker-pulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.25); opacity: .55; } }
-@media (prefers-reduced-motion: reduce) { .marker-pulse { animation: none; } }
+
+.hud-btn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-hud);
+  color: var(--color-hud-foreground);
+  box-shadow: 0 10px 20px rgb(0 0 0 / 0.25);
+}
+.hud-btn:active { background: var(--color-secondary); }
+.pad-btn {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-hud);
+  color: var(--color-hud-foreground);
+  box-shadow: 0 10px 20px rgb(0 0 0 / 0.25);
+}
+.pad-btn:active { background: var(--color-secondary); }
+
+.menu-btn {
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in oklab, var(--color-primary) 70%, white);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.menu-btn:hover { filter: brightness(1.08); }
+.menu-btn-ghost {
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: rgb(0 0 0 / 0.35);
+  color: var(--color-hud-foreground);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.scan-veil {
+  background-image:
+    linear-gradient(rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.78)),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgb(0 0 0 / 0.18) 3px);
+}
+.shard-glow { animation: shard-pulse 1.4s ease-in-out infinite; }
+@keyframes shard-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.25); opacity: 0.7; }
+}
+.chase-flash { animation: chase 0.7s ease-in-out infinite; }
+@keyframes chase {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-pulse, .shard-glow, .chase-flash { animation: none; }
+}
