@@ -1,0 +1,16 @@
+{
+  "grid": [3, 3],
+  "tileIsIsland": true,
+  "waterBetweenTiles": true,
+  "files": {
+    "day": "world-day.jpg",
+    "night": "world-night.jpg",
+    "dayWebp": "world-day.webp",
+    "nightWebp": "world-night.webp"
+  },
+  "tiles": [
+    ["nw-forest", "n-manor", "ne-courtyard"],
+    ["w-cliff-cave", "center-crossroads", "e-fields"],
+    ["sw-beach-camp", "s-palm-wreck", "se-ponds"]
+  ]
+}
