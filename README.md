@@ -1,34 +1,26 @@
 # PIXEL PURSUIT
 
-**Recover three signal beacons. Outrun the predator. Extract before night takes the island.**
+One island. One road. Water stays where water belongs.
 
-A browser survival hunt on a seamless 3×3 jungle — separate day and night art, a hunter that patrols / chases / searches, and a cave extract when the last beacon is live.
+The Lovable 3×3 postcard tiles are **not** the live game anymore. Those nine images did not share edges, so a trail could dump into ocean. The published game paints **one continuous island**:
 
-Play: https://pixelpursuit.lovable.app
+- dirt spine road north → dock (stops before the sea)
+- crossroads east–west
+- swamp west (hide, not ocean)
+- cave extract southwest
+- river only on the east, sea only on the south shore
 
-## Play
-- Move: WASD, arrows, or on-screen pad
-- Sprint: Shift, Space, or RUN
-- Pause: P / Esc
-- Night: N or the sun button (auto nightfall under 1:15)
+## Play (GitHub, not Lovable)
 
-**Standard** — three minutes, readable hunter  
-**Nightmare** — shorter clock, longer vision, faster chase
+1. Make the repo **Public** (free GitHub Pages needs that).
+2. Settings → Pages → Source: **GitHub Actions**.
+3. After the workflow runs:
 
-## Systems
-- Tiled 1536×1536 world (do not flatten to one image)
-- Hide zones cut detection if you stand still
-- Swamp slows, water blocks, kennels snare
-- Compass points at the next beacon, then the cave
-- Local best score
+https://chopdekaradhrit2013-droid.github.io/pixelpursuit/
 
-## Publish
-See `PUBLISH.md` for Vercel + itch.io.
+Or open `docs/index.html` locally in a browser. No Lovable, no npm, no `__l5e` asset URLs.
 
-## Dev
-```sh
-npm i
-npm run dev
-```
-Feel numbers: `src/game/config.ts`  
-Tiles: `src/lib/world-map.ts`
+## Controls
+WASD / pad · Shift or RUN · P pause · M mute
+
+Standard 3:00 · Nightmare 2:30, meaner hunter.
