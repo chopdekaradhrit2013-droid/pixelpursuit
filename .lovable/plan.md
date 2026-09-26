@@ -1,20 +1,19 @@
-# Stage 1: Closer gameplay camera
+# Stage 2: Closer camera and reliable touch controls
 
-## Goal
-Make active gameplay feel noticeably closer without changing the map, art, controls, or game rules.
+## Camera
+- Raise active gameplay zoom to 1.8 on desktop and 1.6 on tablet/mobile.
+- Use the same targets at game start, during play, and after viewport or orientation changes.
+- Preserve smooth following and clamp the camera against every world edge without blank space.
+- Keep menus, HUD, minimap, and controls fixed to the screen.
 
-## Changes
-- Centralize the camera zoom values so every initial and active gameplay state uses the same targets.
-- Set desktop gameplay zoom to about 1.45 and mobile/tablet gameplay zoom to about 1.28.
-- Keep the existing eased camera follow and zoom transition.
-- Harden world-edge clamping so the camera remains valid at all viewport sizes and never exposes space beyond the map.
-- Leave title, briefing, pause, HUD, minimap, and touch controls screen-fixed and readable.
+## Touch controls
+- Keep the existing directional pad and sprint button.
+- Track active pointers so repeated or interrupted events cannot leave movement or sprint stuck.
+- Clear touch input on release, cancellation, lost pointer capture, window blur, pause, and leaving gameplay.
+- Add clear pressed feedback, comfortable hit areas, and safe-area spacing for portrait and landscape.
+- Restrict scroll/zoom prevention to the game surface while retaining desktop keyboard controls.
 
 ## Verification
-- Check desktop and mobile/tablet views at spawn and while moving toward map edges.
-- Confirm overlays and controls remain usable and that no camera or runtime errors appear.
-- Resolve the existing TypeScript inference errors only as needed to restore a clean verification build, without changing gameplay values.
-
-## Technical details
-- Camera values will live as named constants near the existing camera configuration in `PixelPursuit`.
-- Clamp bounds will use non-negative maximum offsets derived from viewport size divided by zoom.
+- Test desktop, iPad/tablet portrait and landscape, and phone portrait and landscape.
+- Check movement and sprint press/release, pause/resume, viewport resizing, camera scale, and map-edge clamping.
+- Confirm the preview remains error-free.
