@@ -65,6 +65,7 @@ const RUNNER_CAM_X = 500;
 const RUNNER_CAM_Y = 40;
 const GAMEPLAY_ZOOM_DESKTOP = 1.45;
 const GAMEPLAY_ZOOM_MOBILE = 1.28;
+const COMPACT_CAMERA_MAX_WIDTH = 1024;
 const MENU_ZOOM = 0.72;
 
 function nextTarget(hud: Hud): { x: number; y: number; label: string } {
@@ -109,6 +110,7 @@ export function PixelPursuit() {
   const [credits, setCredits] = useState(false);
   const [vw, setVw] = useState(1200);
   const [vh, setVh] = useState(800);
+  const usesCompactCamera = vw <= COMPACT_CAMERA_MAX_WIDTH;
 
   useEffect(() => {
     const s = loadSettings();
@@ -161,7 +163,7 @@ export function PixelPursuit() {
       cameraRef.current = {
         x: RUNNER_CAM_X,
         y: RUNNER_CAM_Y,
-        zoom: isMobile ? GAMEPLAY_ZOOM_MOBILE : GAMEPLAY_ZOOM_DESKTOP,
+        zoom: usesCompactCamera ? GAMEPLAY_ZOOM_MOBILE : GAMEPLAY_ZOOM_DESKTOP,
       };
       lastTsRef.current = 0;
       setHud(snapshotHud(simRef.current));
@@ -171,7 +173,7 @@ export function PixelPursuit() {
       setPhaseBoth("play");
       if (first) setHelp(true);
     },
-    [isMobile, persistSettings, setPhaseBoth],
+    [persistSettings, setPhaseBoth, usesCompactCamera],
   );
 
   const toggleMute = useCallback(() => {
@@ -284,7 +286,7 @@ export function PixelPursuit() {
         }
       }
       const targetZoom = playing
-        ? isMobile
+        ? usesCompactCamera
           ? GAMEPLAY_ZOOM_MOBILE
           : GAMEPLAY_ZOOM_DESKTOP
         : MENU_ZOOM;
@@ -310,7 +312,7 @@ export function PixelPursuit() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [isMobile, setPhaseBoth, vh, vw]);
+  }, [setPhaseBoth, usesCompactCamera, vh, vw]);
 
   const pressPad = (dx: number, dy: number, on: boolean) => {
     if (on) {
