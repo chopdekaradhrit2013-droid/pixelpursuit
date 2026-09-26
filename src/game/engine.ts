@@ -82,7 +82,7 @@ export function stepSim(
   if (wantSprint) sim.player.stamina = Math.max(0, sim.player.stamina - GAME.staminaDrain * dt);
   else sim.player.stamina = Math.min(GAME.staminaMax, sim.player.stamina + GAME.staminaRegen * dt);
 
-  let speed = wantSprint ? GAME.sprintSpeed : GAME.walkSpeed;
+  let speed: number = wantSprint ? GAME.sprintSpeed : GAME.walkSpeed;
   if (sim.player.hidden) speed = GAME.hideWalkSpeed;
   if (inSwamp) speed *= GAME.swampMul;
   if (sim.trapTimer > 0) speed *= GAME.trapSlowMul;
@@ -135,7 +135,7 @@ export function stepSim(
     if (sim.hunter.loseTimer <= 0) sim.hunter.state = "search";
   }
 
-  let hunterSpeed = GAME.hunterWalk;
+  let hunterSpeed: number = GAME.hunterWalk;
   if (sim.hunter.state === "chase") hunterSpeed = GAME.hunterChase * (difficulty === "nightmare" ? 1.12 : 1);
   if (sim.hunter.state === "search") hunterSpeed = GAME.hunterSearch;
 
@@ -143,7 +143,7 @@ export function stepSim(
   if (sim.hunter.state === "chase") dest = sim.player;
   else if (sim.hunter.state === "search" && sim.hunter.lastSeen) dest = sim.hunter.lastSeen;
   else {
-    dest = HUNTER_PATROL[sim.hunter.patrolIndex % HUNTER_PATROL.length];
+    dest = HUNTER_PATROL[sim.hunter.patrolIndex % HUNTER_PATROL.length] ?? HUNTER_SPAWN;
   }
 
   const moved = moveToward(sim.hunter, dest, hunterSpeed, dt);
