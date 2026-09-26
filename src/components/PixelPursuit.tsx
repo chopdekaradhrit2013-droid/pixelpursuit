@@ -63,8 +63,8 @@ function snapshotHud(sim: Sim) {
 type Hud = ReturnType<typeof snapshotHud>;
 const RUNNER_CAM_X = 500;
 const RUNNER_CAM_Y = 40;
-const GAMEPLAY_ZOOM_DESKTOP = 1.45;
-const GAMEPLAY_ZOOM_MOBILE = 1.28;
+const GAMEPLAY_ZOOM_DESKTOP = 1.8;
+const GAMEPLAY_ZOOM_MOBILE = 1.6;
 const COMPACT_CAMERA_MAX_WIDTH = 1024;
 const MENU_ZOOM = 0.72;
 
@@ -110,7 +110,9 @@ export function PixelPursuit() {
   const [credits, setCredits] = useState(false);
   const [vw, setVw] = useState(1200);
   const [vh, setVh] = useState(800);
+  const [hasCoarsePointer, setHasCoarsePointer] = useState(false);
   const usesCompactCamera = vw <= COMPACT_CAMERA_MAX_WIDTH;
+  const showTouchControls = isMobile || hasCoarsePointer;
 
   useEffect(() => {
     const s = loadSettings();
@@ -119,6 +121,14 @@ export function PixelPursuit() {
     setDifficulty(s.lastDifficulty);
     diffRef.current = s.lastDifficulty;
     setBest(loadBest());
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(pointer: coarse)");
+    const apply = () => setHasCoarsePointer(media.matches || navigator.maxTouchPoints > 0);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
   }, []);
 
   useEffect(() => {
@@ -145,6 +155,9 @@ export function PixelPursuit() {
   }, []);
 
   const setPhaseBoth = useCallback((p: Phase) => {
+    if (p !== "play") {
+      padRef.current = { x: 0, y: 0, sprint: false };
+    }
     phaseRef.current = p;
     setPhase(p);
   }, []);
@@ -210,10 +223,15 @@ export function PixelPursuit() {
     const up = (e: KeyboardEvent) => onKey(e, false);
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
-    window.addEventListener("blur", () => keysRef.current.clear());
+    const clearInput = () => {
+      keysRef.current.clear();
+      padRef.current = { x: 0, y: 0, sprint: false };
+    };
+    window.addEventListener("blur", clearInput);
     return () => {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", clearInput);
     };
   }, [setPhaseBoth, toggleDay, toggleMute]);
 
@@ -314,15 +332,14 @@ export function PixelPursuit() {
     return () => cancelAnimationFrame(raf);
   }, [setPhaseBoth, usesCompactCamera, vh, vw]);
 
-  const pressPad = (dx: number, dy: number, on: boolean) => {
-    if (on) {
-      padRef.current.x += dx;
-      padRef.current.y += dy;
-    } else {
-      padRef.current.x -= dx;
-      padRef.current.y -= dy;
-    }
-  };
+  const pressPad = useCallback((dx: number, dy: number, on: boolean) => {
+    padRef.current.x = Math.max(-1, Math.min(1, padRef.current.x + dx * (on ? 1 : -1)));
+    padRef.current.y = Math.max(-1, Math.min(1, padRef.current.y + dy * (on ? 1 : -1)));
+  }, []);
+
+  const setPadSprint = useCallback((on: boolean) => {
+    padRef.current.sprint = on;
+  }, []);
 
   const vig = time === "night" ? GAME.nightVignette : GAME.dayVignette;
   const score = Math.round(hud.timeLeft * 10 + hud.collected * 250);
@@ -331,7 +348,7 @@ export function PixelPursuit() {
   const nearDeath = hud.heartbeat > 0.45 && phase === "play";
 
   return (
-    <div ref={viewportRef} className="game-viewport relative h-[100dvh] w-full overflow-hidden bg-[var(--color-world-edge)]">
+    <div ref={viewportRef} className={`game-viewport relative h-[100dvh] w-full overflow-hidden bg-[var(--color-world-edge)] ${phase === "play" ? "game-viewport-active" : ""}`}>
       <div ref={worldRef} className="world-map absolute left-0 top-0" style={{ width: WORLD_SIZE, height: WORLD_SIZE }}>
         {WORLD_TILES.map((tile) => {
           const src = time === "day" ? tile.day ?? tile.night : tile.night;
@@ -369,7 +386,7 @@ export function PixelPursuit() {
           </div>
         </>
       )}
-      {isMobile && phase === "play" && <MobilePad onDir={pressPad} onSprint={(on) => { padRef.current.sprint = on; }} />}
+      {showTouchControls && phase === "play" && <MobilePad onDir={pressPad} onSprint={setPadSprint} />}
       {help && phase === "play" && (
         <div className="absolute inset-0 z-[55] flex items-center justify-center bg-black/55 px-4">
           <div className="max-w-sm rounded-md border border-white/20 bg-[#0b1220] p-4 text-left text-sm text-white/80">
@@ -511,29 +528,83 @@ function Minimap({ hud }: { hud: Hud }) {
 }
 
 function MobilePad({ onDir, onSprint }: { onDir: (dx: number, dy: number, on: boolean) => void; onSprint: (on: boolean) => void }) {
+  const activeDirectionsRef = useRef(new Map<number, { dx: number; dy: number }>());
+  const sprintPointersRef = useRef(new Set<number>());
+  const [pressedDirections, setPressedDirections] = useState<Set<number>>(() => new Set());
+  const [sprintPressed, setSprintPressed] = useState(false);
+
+  const releaseDirection = (pointerId: number) => {
+    const direction = activeDirectionsRef.current.get(pointerId);
+    if (!direction) return;
+    activeDirectionsRef.current.delete(pointerId);
+    onDir(direction.dx, direction.dy, false);
+    setPressedDirections(new Set(activeDirectionsRef.current.keys()));
+  };
+
+  const releaseSprint = (pointerId: number) => {
+    if (!sprintPointersRef.current.delete(pointerId)) return;
+    const active = sprintPointersRef.current.size > 0;
+    onSprint(active);
+    setSprintPressed(active);
+  };
+
+  useEffect(() => () => {
+    for (const direction of activeDirectionsRef.current.values()) {
+      onDir(direction.dx, direction.dy, false);
+    }
+    activeDirectionsRef.current.clear();
+    sprintPointersRef.current.clear();
+    onSprint(false);
+  }, [onDir, onSprint]);
+
   const hold = (dx: number, dy: number) => ({
     onPointerDown: (e: PointerEvent) => {
       e.preventDefault();
+      if (activeDirectionsRef.current.has(e.pointerId)) return;
       (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId);
+      activeDirectionsRef.current.set(e.pointerId, { dx, dy });
       onDir(dx, dy, true);
+      setPressedDirections(new Set(activeDirectionsRef.current.keys()));
     },
-    onPointerUp: () => onDir(dx, dy, false),
-    onPointerCancel: () => onDir(dx, dy, false),
+    onPointerUp: (e: PointerEvent) => releaseDirection(e.pointerId),
+    onPointerCancel: (e: PointerEvent) => releaseDirection(e.pointerId),
+    onPointerLeave: (e: PointerEvent) => releaseDirection(e.pointerId),
+    onLostPointerCapture: (e: PointerEvent) => releaseDirection(e.pointerId),
   });
+
+  const sprintHold = {
+    onPointerDown: (e: PointerEvent) => {
+      e.preventDefault();
+      (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId);
+      sprintPointersRef.current.add(e.pointerId);
+      onSprint(true);
+      setSprintPressed(true);
+    },
+    onPointerUp: (e: PointerEvent) => releaseSprint(e.pointerId),
+    onPointerCancel: (e: PointerEvent) => releaseSprint(e.pointerId),
+    onPointerLeave: (e: PointerEvent) => releaseSprint(e.pointerId),
+    onLostPointerCapture: (e: PointerEvent) => releaseSprint(e.pointerId),
+  };
+
+  const directionButton = (label: string, dx: number, dy: number) => {
+    const active = [...activeDirectionsRef.current.entries()].some(([, direction]) => direction.dx === dx && direction.dy === dy);
+    return <button aria-label={label} className="pad-btn" data-pressed={active || undefined} {...hold(dx, dy)}>{label === "Move up" ? "▲" : label === "Move left" ? "◀" : label === "Move right" ? "▶" : "▼"}</button>;
+  };
+
   return (
-    <div className="absolute bottom-4 left-3 right-3 z-50 flex items-end justify-between">
-      <div className="grid grid-cols-3 gap-1">
+    <div className="mobile-controls absolute z-50 flex items-end justify-between" data-active-directions={pressedDirections.size}>
+      <div className="grid grid-cols-3 gap-1.5">
         <span />
-        <button className="pad-btn" {...hold(0, -1)}>▲</button>
+        {directionButton("Move up", 0, -1)}
         <span />
-        <button className="pad-btn" {...hold(-1, 0)}>◀</button>
+        {directionButton("Move left", -1, 0)}
         <span />
-        <button className="pad-btn" {...hold(1, 0)}>▶</button>
+        {directionButton("Move right", 1, 0)}
         <span />
-        <button className="pad-btn" {...hold(0, 1)}>▼</button>
+        {directionButton("Move down", 0, 1)}
         <span />
       </div>
-      <button className="pad-btn h-16 w-16 rounded-full text-xs font-bold tracking-widest" onPointerDown={(e) => { e.preventDefault(); onSprint(true); }} onPointerUp={() => onSprint(false)} onPointerCancel={() => onSprint(false)}>RUN</button>
+      <button aria-label="Sprint" className="pad-btn sprint-btn text-xs font-bold tracking-widest" data-pressed={sprintPressed || undefined} {...sprintHold}>RUN</button>
     </div>
   );
 }
